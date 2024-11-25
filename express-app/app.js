@@ -1,20 +1,18 @@
 const express = require('express');
 const app = express();
+const { healthCheck, getTopics, getArticleID } = require('./app.controllers');
+const { routeHandle } = require('./error-handling/routeHandle');
+const { errorHandle } = require('./error-handling/errorHandle');
+
 app.use(express.json());
-const { healthCheck, getTopics } = require('./app.controllers');
 
 app.get('/api', healthCheck);
 
 app.get('/api/topics', getTopics);
 
-app.use((req, res) => {
-  res.status(404).send({ msg: `Not found` });
-});
+app.get('/api/articles/:article_id', getArticleID);
 
-app.use((err, req, res, next) => {
-  const status = err.status || 500;
-  const msg = err.msg || 'Internal Server Error';
-  res.status(status).send({ msg });
-});
+app.all('*', routeHandle);
+app.use(errorHandle);
 
 module.exports = app;

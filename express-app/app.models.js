@@ -1,14 +1,17 @@
 const db = require('../db/connection');
 
-exports.fetchTopics = (slug, description) => {
-  let query = `SELECT * FROM topics`;
-  if (slug) {
-    query += ` WHERE slug = ${'slug'}`;
-  }
-  if (description) {
-    query += ` WHERE description = ${`description`}`;
+exports.fetchTopics = () => {
+  return db.query(`SELECT * FROM topics;`).then(({ rows }) => {
+    return rows;
+  });
+};
+
+exports.fetchArticleID = (articleID) => {
+  let query = `SELECT * FROM articles`;
+  if (articleID) {
+    query += ` WHERE article_id = ${articleID}`;
   }
   return db.query(`${query};`).then(({ rows }) => {
-    return rows;
+    return rows[0];
   });
 };

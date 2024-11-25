@@ -1,31 +1,29 @@
-const express = require('express');
-const app = express();
 const endpointsJson = require('../endpoints.json');
-const { fetchTopics } = require('./app.models');
+const { fetchTopics, fetchArticleID } = require('./app.models');
 
 exports.healthCheck = (req, res) => {
   res.status(200).send({ endpoints: endpointsJson });
 };
 
 exports.getTopics = (req, res, next) => {
-  const { slug, description } = req.query;
-  if (slug && !['mitch', 'cats', 'paper'].includes(slug)) {
-    return next({ status: 404, msg: 'Not found' });
-  }
-  if (
-    description &&
-    ![
-      'The man, the Mitch, the legend',
-      'Not dogs',
-      'what books are made of',
-    ].includes(description)
-  ) {
-    return next({ status: 404, msg: 'Not found' });
-  }
   fetchTopics()
-    .then((result) => {
-      console.log({ status: 200, msg: `200: Server Running Okay` });
-      res.status(200).send({ result });
+    .then((topic) => {
+      res.status(200).send({ topic });
+    })
+    .catch(next);
+};
+
+exports.getArticleID = (req, res, next) => {
+  const { article_id } = req.params;
+  if (!article_id || !Number(article_id)) {
+    return next({ status: 400, msg: 'Bad Request' });
+  }
+  fetchArticleID(article_id)
+    .then((article) => {
+      if (!article) {
+        return next({ status: 404, msg: 'Not found' });
+      }
+      res.status(200).send({ article });
     })
     .catch(next);
 };

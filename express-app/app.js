@@ -1,6 +1,11 @@
 const express = require('express');
 const app = express();
-const { healthCheck, getTopics, getArticleID } = require('./app.controllers');
+const {
+  healthCheck,
+  getTopics,
+  getArticleID,
+  getArticles,
+} = require('./app.controllers');
 const { routeHandle } = require('./error-handling/routeHandle');
 const { errorHandle } = require('./error-handling/errorHandle');
 
@@ -11,6 +16,8 @@ app.get('/api', healthCheck);
 app.get('/api/topics', getTopics);
 
 app.get('/api/articles/:article_id', getArticleID);
+
+app.get('/api/articles', getArticles);
 
 app.all('*', routeHandle);
 app.use(errorHandle);

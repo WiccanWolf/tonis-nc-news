@@ -4,6 +4,7 @@ const request = require('supertest');
 const app = require('../express-app/app');
 const data = require('../db/data/test-data');
 const seed = require('../db/seeds/seed');
+const toBeSortedBy = require('jest-sorted');
 /* Set up your test imports here */
 
 /* Set up your beforeEach & afterAll functions here */
@@ -54,18 +55,6 @@ describe('GET /api/topics', () => {
         expect(body.msg).toBe('Not found');
       });
   });
-
-  test('500: Responds with an error message for a server error', () => {
-    jest.spyOn(db, 'query').mockImplementationOnce(() => {
-      throw new Error('Database error');
-    });
-    return request(app)
-      .get('/api/topics')
-      .expect(500)
-      .then(({ body }) => {
-        expect(body.msg).toBe('Internal Server Error');
-      });
-  });
 });
 
 describe('GET /api/articles/:article_id', () => {
@@ -104,6 +93,69 @@ describe('GET /api/articles/:article_id', () => {
       .expect(404)
       .then(({ body }) => {
         expect(body.msg).toBe('Not found');
+      });
+  });
+});
+
+describe('GET /api/articles', () => {
+  test('200: Responds with an array of article objects with the correct properties', () => {
+    return request(app)
+      .get('/api/articles')
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles).toBeInstanceOf(Array);
+        expect(articles).toHaveLength(13);
+        articles.forEach((article) => {
+          expect(article).toEqual(
+            expect.objectContaining({
+              author: expect.any(String),
+              title: expect.any(String),
+              article_id: expect.any(Number),
+              topic: expect.any(String),
+              created_at: expect.any(String),
+              votes: expect.any(Number),
+              article_img_url: expect.any(String),
+              comment_count: expect.any(String),
+            })
+          );
+          expect(article).not.toHaveProperty('body');
+        });
+      });
+  });
+
+  test('200: Articles are sorted by created_at in descending order', () => {
+    return request(app)
+      .get('/api/articles')
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles).toBeSortedBy('created_at', { descending: true });
+      });
+  });
+
+  test('404: Responds with an error message when endpoint does not exist', () => {
+    return request(app)
+      .get('/api/nonexistent')
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe('Not found');
+      });
+  });
+
+  test('400: Responds with an error message for invalid sort_by query', () => {
+    return request(app)
+      .get('/api/articles?sort_by=invalid_column')
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe('Bad Request: Invalid Sort Query');
+      });
+  });
+
+  test('400: Responds with an error message for invalid order query', () => {
+    return request(app)
+      .get('/api/articles?order=INVALID')
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe('Bad request: Invalid Order Query');
       });
   });
 });

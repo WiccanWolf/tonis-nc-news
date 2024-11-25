@@ -1,10 +1,14 @@
 const express = require('express');
 const app = express();
-const endpointsJson = require('./endpoints.json');
 app.use(express.json());
+const { healthCheck, getTopics } = require('./app.controllers');
 
-app.get('/api', (req, res) => {
-  res.status(200).send({ endpoints: endpointsJson });
+app.get('/api', healthCheck);
+
+app.get('/api/topics', getTopics);
+
+app.use((req, res) => {
+  res.status(404).send({ msg: `Not found` });
 });
 
 app.use((err, req, res, next) => {

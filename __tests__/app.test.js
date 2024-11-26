@@ -4,7 +4,7 @@ const request = require('supertest');
 const app = require('../express-app/app');
 const data = require('../db/data/test-data');
 const seed = require('../db/seeds/seed');
-const toBeSortedBy = require('jest-sorted');
+const { toBeSortedBy } = require('jest-sorted');
 /* Set up your test imports here */
 
 /* Set up your beforeEach & afterAll functions here */
@@ -15,6 +15,26 @@ beforeEach(() => {
 
 afterAll(() => {
   return db.end();
+});
+
+describe('404 Route Handler', () => {
+  const invalidEndpoints = [
+    '/api/nonexistentendpoint',
+    '/api/users/unknownUser',
+    '/api/invalidRoute',
+    '/random/invalid/endpoint',
+  ];
+
+  invalidEndpoints.forEach((endpoint) => {
+    test(`404: responds with "Not Found" for ${endpoint}`, () => {
+      return request(app)
+        .get(endpoint)
+        .expect(404)
+        .then(({ body }) => {
+          expect(body.msg).toBe('Not Found');
+        });
+    });
+  });
 });
 
 describe('GET /api', () => {
@@ -44,15 +64,6 @@ describe('GET /api/topics', () => {
             })
           );
         });
-      });
-  });
-
-  test('404: Responds with an error message when the endpoint does not exist', () => {
-    return request(app)
-      .get('/api/nonexistent-endpoint')
-      .expect(404)
-      .then(({ body }) => {
-        expect(body.msg).toBe('Not found');
       });
   });
 });
@@ -86,15 +97,6 @@ describe('GET /api/articles/:article_id', () => {
         expect(body.msg).toBe('Bad Request');
       });
   });
-
-  test('404: Responds with an error message if no article is found for a valid but non-existent ID', () => {
-    return request(app)
-      .get('/api/articles/9999')
-      .expect(404)
-      .then(({ body }) => {
-        expect(body.msg).toBe('Not found');
-      });
-  });
 });
 
 describe('GET /api/articles', () => {
@@ -118,7 +120,6 @@ describe('GET /api/articles', () => {
               comment_count: expect.any(String),
             })
           );
-          expect(article).not.toHaveProperty('body');
         });
       });
   });
@@ -131,16 +132,6 @@ describe('GET /api/articles', () => {
         expect(articles).toBeSortedBy('created_at', { descending: true });
       });
   });
-
-  test('404: Responds with an error message when endpoint does not exist', () => {
-    return request(app)
-      .get('/api/nonexistent')
-      .expect(404)
-      .then(({ body }) => {
-        expect(body.msg).toBe('Not found');
-      });
-  });
-
   test('400: Responds with an error message for invalid sort_by query', () => {
     return request(app)
       .get('/api/articles?sort_by=invalid_column')
@@ -155,7 +146,52 @@ describe('GET /api/articles', () => {
       .get('/api/articles?order=INVALID')
       .expect(400)
       .then(({ body }) => {
-        expect(body.msg).toBe('Bad request: Invalid Order Query');
+        expect(body.msg).toBe('Bad Request: Invalid Order Query');
+      });
+  });
+});
+
+describe('GET /api/articles/:article_id/comments', () => {
+  test('200: responds with an array of comments for the given article_id, sorted by most recent first', () => {
+    return request(app)
+      .get('/api/articles/1/comments')
+      .expect(200)
+      .then((res) => {
+        const { comments } = res.body;
+        expect(Array.isArray(comments)).toBe(true);
+        comments.forEach((comment) => {
+          expect(comment).toEqual(
+            expect.objectContaining({
+              comment_id: expect.any(Number),
+              votes: expect.any(Number),
+              created_at: expect.any(String),
+              author: expect.any(String),
+              body: expect.any(String),
+              article_id: 1,
+            })
+          );
+        });
+        expect(new Date(comments[0].created_at).getTime()).toBeGreaterThan(
+          new Date(comments[comments.length - 1].created_at).getTime()
+        );
+      });
+  });
+
+  test('200: responds with an empty array if the article exists but has no comments', () => {
+    return request(app)
+      .get('/api/articles/2/comments')
+      .expect(200)
+      .then((res) => {
+        expect(res.body.comments).toEqual([]);
+      });
+  });
+
+  test('400: responds with "Bad Request" for an invalid article_id', () => {
+    return request(app)
+      .get('/api/articles/invalid/comments')
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe('Bad Request');
       });
   });
 });

@@ -313,3 +313,18 @@ describe('PATCH /api/articles/:article_id', () => {
       });
   });
 });
+
+describe('DELETE /api/comments/:comment_id', () => {
+  test('204: successfully deletes a comment by comment_id and responds with no content', () => {
+    return request(app).delete('/api/comments/1').expect(204);
+  });
+
+  test('400: responds with "Bad Request" if comment_id is invalid', () => {
+    return request(app)
+      .delete('/api/comments/abc')
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe('Bad Request');
+      });
+  });
+});

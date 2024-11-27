@@ -106,7 +106,7 @@ describe('GET /api/articles', () => {
       .expect(200)
       .then(({ body: { articles } }) => {
         expect(articles).toBeInstanceOf(Array);
-        expect(articles).toHaveLength(13);
+        expect(articles).toHaveLength(12);
         articles.forEach((article) => {
           expect(article).toEqual(
             expect.objectContaining({

@@ -195,3 +195,67 @@ describe('GET /api/articles/:article_id/comments', () => {
       });
   });
 });
+describe('POST /api/articles/:article_id/comments', () => {
+  test.skip('201: successfully adds a comment for an article and responds with the posted comment', () => {
+    const newComment = {
+      author: 'albertthelad',
+      body: 'Great article! Needs more biscuits though...',
+    };
+    return request(app)
+      .post('/api/articles/1/comments')
+      .send(newComment)
+      .expect(201)
+      .then(({ body }) => {
+        expect(body.comment).toEqual(
+          expect.objectContaining({
+            comment_id: expect.any(Number),
+            article_id: 1,
+            author: 'albertthelad',
+            body: 'Great article! Needs more biscuits though...',
+            votes: expect.any(Number),
+            created_at: expect.any(String),
+          })
+        );
+      });
+  });
+
+  test('400: responds with "Bad Request" if author is missing in request body', () => {
+    const newComment = {
+      body: 'Mmm delicious',
+    };
+    return request(app)
+      .post('/api/articles/1/comments')
+      .send(newComment)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe('Bad Request');
+      });
+  });
+
+  test('400: responds with "Bad Request" if body is missing in the request body', () => {
+    const newComment = {
+      author: 'opaltheeeper123',
+    };
+    return request(app)
+      .post('/api/articles/1/comments')
+      .send(newComment)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe('Bad Request');
+      });
+  });
+
+  test('400: responds with "Bad Request" if body is too short (less than 1 character)', () => {
+    const newComment = {
+      author: 'theWalkingDictionary',
+      body: '',
+    };
+    return request(app)
+      .post('/api/articles/1/comments')
+      .send(newComment)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe('Bad Request');
+      });
+  });
+});

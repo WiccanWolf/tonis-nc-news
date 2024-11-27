@@ -6,6 +6,7 @@ const {
   getArticleID,
   getArticles,
   getComments,
+  createComment,
 } = require('./app.controllers');
 const { routeHandle } = require('./error-handling/routeHandle');
 const { errorHandle } = require('./error-handling/errorHandle');
@@ -21,6 +22,7 @@ app.get('/api/articles/:article_id', getArticleID);
 app.get('/api/articles', getArticles);
 
 app.get('/api/articles/:article_id/comments', getComments);
+app.post('/api/articles/:article_id/comments', createComment);
 
 app.all('*', routeHandle);
 app.use(errorHandle);

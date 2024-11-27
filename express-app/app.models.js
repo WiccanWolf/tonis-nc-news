@@ -1,4 +1,5 @@
 const db = require('../db/connection');
+const format = require('pg-format');
 
 exports.fetchTopics = () => {
   return db.query(`SELECT * FROM topics;`).then(({ rows }) => {
@@ -59,5 +60,31 @@ exports.fetchComments = (article_id) => {
   }
   return db.query(`${query};`, [article_id]).then(({ rows }) => {
     return rows;
+  });
+};
+
+exports.postNewComment = ({ article_id, author, body }) => {
+  if (!author || !body) {
+    return Promise.reject({ status: 400, msg: 'Bad Request' });
+  }
+  if (body.length < 1) {
+    return Promise.reject({ status: 400, msg: 'Bad Request' });
+  }
+  const query = format(
+    'INSERT INTO comments (article_id, author, body) VALUES (%L, %L, %L) RETURNING *;',
+    article_id,
+    author,
+    body
+  );
+  return db.query(query).then(({ rows }) => {
+    const newComment = rows[0];
+    return {
+      comment_id: newComment.comment_id,
+      article_id: newComment.article_id,
+      author: newComment.author,
+      body: newComment.body,
+      votes: newComment.votes || 0,
+      created_at: newComment.created_at.toString(),
+    };
   });
 };

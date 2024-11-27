@@ -4,6 +4,7 @@ const {
   fetchArticleID,
   fetchArticles,
   fetchComments,
+  postNewComment,
 } = require('./app.models');
 
 exports.healthCheck = (req, res) => {
@@ -41,6 +42,16 @@ exports.getComments = (req, res, next) => {
   fetchComments(article_id)
     .then((comments) => {
       res.status(200).send({ comments });
+    })
+    .catch(next);
+};
+
+exports.createComment = (req, res, next) => {
+  const { article_id } = req.params;
+  const { author, body } = req.body;
+  postNewComment({ article_id, author, body })
+    .then((comment) => {
+      res.status(201).send({ comment });
     })
     .catch(next);
 };

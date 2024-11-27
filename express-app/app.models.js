@@ -102,3 +102,10 @@ exports.updateArticleVotes = (articleId, incVotes) => {
       return rows[0];
     });
 };
+exports.removeCommentAtID = (comment_id) => {
+  const query = `DELETE FROM comments WHERE comment_id = $1 RETURNING *;`;
+  if (!Number(comment_id)) {
+    return Promise.reject({ status: 400, msg: 'Bad Request' });
+  }
+  return db.query(`${query}`, [comment_id]);
+};

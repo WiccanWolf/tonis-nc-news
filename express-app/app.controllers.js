@@ -6,6 +6,7 @@ const {
   fetchComments,
   postNewComment,
   updateArticleVotes,
+  removeCommentAtID,
 } = require('./app.models');
 
 exports.healthCheck = (req, res) => {
@@ -63,6 +64,15 @@ exports.updateArticle = (req, res, next) => {
   updateArticleVotes(article_id, inc_votes)
     .then((updatedArticle) => {
       res.status(200).send({ article: updatedArticle });
+    })
+    .catch(next);
+};
+
+exports.deleteComment = (req, res, next) => {
+  const { comment_id } = req.params;
+  removeCommentAtID(comment_id)
+    .then(() => {
+      res.status(204).send();
     })
     .catch(next);
 };

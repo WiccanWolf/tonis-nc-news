@@ -109,3 +109,9 @@ exports.removeCommentAtID = (comment_id) => {
   }
   return db.query(`${query}`, [comment_id]);
 };
+exports.fetchUsers = () => {
+  const query = `SELECT * FROM users`;
+  return db.query(`${query};`).then(({ rows }) => {
+    return rows;
+  });
+};

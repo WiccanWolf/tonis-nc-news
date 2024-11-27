@@ -21,33 +21,52 @@ exports.fetchArticleID = (article_id) => {
   });
 };
 
-exports.fetchArticles = (sort_by = 'created_at', order = 'DESC') => {
+exports.fetchArticles = (sort_by, order, topic) => {
   const validSortColumns = ['author', 'title', 'created_at', 'votes'];
   const validOrder = ['ASC', 'DESC'];
+  const validTopics = ['mitch', 'cats', 'paper'];
 
-  if (!validSortColumns.includes(sort_by)) {
-    return Promise.reject({
-      status: 400,
-      msg: 'Bad Request: Invalid Sort Query',
-    });
-  }
-
-  if (!validOrder.includes(order.toUpperCase())) {
-    return Promise.reject({
-      status: 400,
-      msg: 'Bad Request: Invalid Order Query',
-    });
-  }
-
-  const query = `
-    SELECT articles.*, COUNT(comments.comment_id) AS comment_count
-    FROM articles
-    LEFT JOIN comments ON comments.article_id = articles.article_id
-    GROUP BY articles.article_id
-    ORDER BY ${sort_by} ${order};
+  let query = `
+  SELECT articles.*, COUNT(comments.comment_id) AS comment_count
+  FROM articles
+  LEFT JOIN comments ON comments.article_id = articles.article_id
   `;
 
-  return db.query(query).then(({ rows }) => rows);
+  if (topic) {
+    if (!validTopics.includes(topic)) {
+      return Promise.reject({
+        status: 400,
+        msg: 'Bad Request: Invalid Topic Query',
+      });
+    }
+    query += `WHERE topic = '${topic}' `;
+  }
+
+  query += `GROUP BY articles.article_id `;
+
+  if (sort_by) {
+    if (!validSortColumns.includes(sort_by)) {
+      return Promise.reject({
+        status: 400,
+        msg: 'Bad Request: Invalid Sort Query',
+      });
+    }
+    query += `ORDER BY ${sort_by} `;
+  }
+
+  if (order) {
+    if (!validOrder.includes(order.toUpperCase())) {
+      return Promise.reject({
+        status: 400,
+        msg: 'Bad Request: Invalid Order Query',
+      });
+    }
+    query += `${order.toUpperCase()} `;
+  }
+
+  return db.query(`${query};`).then(({ rows }) => {
+    return rows;
+  });
 };
 
 exports.fetchComments = (article_id) => {

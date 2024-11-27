@@ -5,6 +5,7 @@ const {
   fetchArticles,
   fetchComments,
   postNewComment,
+  updateArticleVotes,
 } = require('./app.models');
 
 exports.healthCheck = (req, res) => {
@@ -52,6 +53,16 @@ exports.createComment = (req, res, next) => {
   postNewComment({ article_id, author, body })
     .then((comment) => {
       res.status(201).send({ comment });
+    })
+    .catch(next);
+};
+exports.updateArticle = (req, res, next) => {
+  const { article_id } = req.params;
+  const { inc_votes } = req.body;
+
+  updateArticleVotes(article_id, inc_votes)
+    .then((updatedArticle) => {
+      res.status(200).send({ article: updatedArticle });
     })
     .catch(next);
 };

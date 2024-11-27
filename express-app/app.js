@@ -7,6 +7,7 @@ const {
   getArticles,
   getComments,
   createComment,
+  updateArticle,
 } = require('./app.controllers');
 const { routeHandle } = require('./error-handling/routeHandle');
 const { errorHandle } = require('./error-handling/errorHandle');
@@ -18,6 +19,7 @@ app.get('/api', healthCheck);
 app.get('/api/topics', getTopics);
 
 app.get('/api/articles/:article_id', getArticleID);
+app.patch('/api/articles/:article_id', updateArticle);
 
 app.get('/api/articles', getArticles);
 

@@ -259,3 +259,57 @@ describe('POST /api/articles/:article_id/comments', () => {
       });
   });
 });
+describe('PATCH /api/articles/:article_id', () => {
+  test('200: successfully updates the votes of an article and responds with the updated article', () => {
+    const newVote = { inc_votes: 1 };
+    return request(app)
+      .patch('/api/articles/1')
+      .send(newVote)
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.article).toEqual(
+          expect.objectContaining({
+            author: expect.any(String),
+            title: expect.any(String),
+            article_id: expect.any(Number),
+            topic: expect.any(String),
+            created_at: expect.any(String),
+            votes: expect.any(Number),
+            article_img_url: expect.any(String),
+            body: expect.any(String),
+          })
+        );
+      });
+  });
+
+  test('200: successfully decrements the votes of an article', () => {
+    const newVote = { inc_votes: -5 };
+    return request(app)
+      .patch('/api/articles/2')
+      .send(newVote)
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.article.votes).toBe(-5);
+      });
+  });
+
+  test('400: responds with "Bad Request" if inc_votes is not provided', () => {
+    return request(app)
+      .patch('/api/articles/1')
+      .send({})
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe('Bad Request');
+      });
+  });
+
+  test('400: responds with "Bad Request" if inc_votes is not a number', () => {
+    return request(app)
+      .patch('/api/articles/1')
+      .send({ inc_votes: 'notANumber' })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe('Bad Request');
+      });
+  });
+});

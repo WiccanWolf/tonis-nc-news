@@ -22,11 +22,13 @@ exports.fetchArticles = (sort_by, order, topic) => {
   const validSortColumns = ['author', 'title', 'created_at', 'votes'];
   const validOrder = ['ASC', 'DESC'];
   const validTopics = ['mitch', 'cats', 'paper'];
+
   let query = `
-  SELECT articles.*, COUNT(comments.comment_id) AS comment_count
-  FROM articles
-  LEFT JOIN comments ON comments.article_id = articles.article_id
+    SELECT articles.*, COUNT(comments.comment_id) AS comment_count
+    FROM articles
+    LEFT JOIN comments ON comments.article_id = articles.article_id
   `;
+
   if (topic) {
     if (!validTopics.includes(topic)) {
       return Promise.reject({
@@ -36,7 +38,9 @@ exports.fetchArticles = (sort_by, order, topic) => {
     }
     query += `WHERE topic = '${topic}' `;
   }
+
   query += `GROUP BY articles.article_id `;
+
   if (sort_by) {
     if (!validSortColumns.includes(sort_by)) {
       return Promise.reject({
@@ -46,6 +50,7 @@ exports.fetchArticles = (sort_by, order, topic) => {
     }
     query += `ORDER BY ${sort_by} `;
   }
+
   if (order) {
     if (!validOrder.includes(order.toUpperCase())) {
       return Promise.reject({
@@ -57,7 +62,6 @@ exports.fetchArticles = (sort_by, order, topic) => {
   } else if (sort_by) {
     query += `ASC `;
   }
-
   return db.query(`${query};`).then(({ rows }) => {
     return rows;
   });

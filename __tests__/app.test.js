@@ -5,6 +5,8 @@ const app = require('../express-app/app');
 const data = require('../db/data/test-data');
 const seed = require('../db/seeds/seed');
 const { toBeSortedBy } = require('jest-sorted');
+const { insertTestUser } = require('../express-app/app.models');
+
 /* Set up your test imports here */
 
 /* Set up your beforeEach & afterAll functions here */
@@ -195,18 +197,20 @@ describe('GET /api/articles/:article_id/comments', () => {
       });
   });
 });
+
 describe('POST /api/articles/:article_id/comments', () => {
-  test.skip('201: successfully adds a comment for an article and responds with the posted comment', () => {
+  test('201: successfully adds a comment for an article and responds with the posted comment', () => {
     const newComment = {
       author: 'albertthelad',
       body: 'Great article! Needs more biscuits though...',
     };
+
     return request(app)
       .post('/api/articles/1/comments')
       .send(newComment)
       .expect(201)
-      .then(({ body }) => {
-        expect(body.comment).toEqual(
+      .then((response) => {
+        expect(response.body.comment).toEqual(
           expect.objectContaining({
             comment_id: expect.any(Number),
             article_id: 1,
@@ -218,7 +222,6 @@ describe('POST /api/articles/:article_id/comments', () => {
         );
       });
   });
-
   test('400: responds with "Bad Request" if author is missing in request body', () => {
     const newComment = {
       body: 'Mmm delicious',
@@ -234,7 +237,7 @@ describe('POST /api/articles/:article_id/comments', () => {
 
   test('400: responds with "Bad Request" if body is missing in the request body', () => {
     const newComment = {
-      author: 'opaltheeeper123',
+      username: 'opaltheeeper123',
     };
     return request(app)
       .post('/api/articles/1/comments')
@@ -247,7 +250,7 @@ describe('POST /api/articles/:article_id/comments', () => {
 
   test('400: responds with "Bad Request" if body is too short (less than 1 character)', () => {
     const newComment = {
-      author: 'theWalkingDictionary',
+      username: 'theWalkingDictionary',
       body: '',
     };
     return request(app)
@@ -259,6 +262,7 @@ describe('POST /api/articles/:article_id/comments', () => {
       });
   });
 });
+
 describe('PATCH /api/articles/:article_id', () => {
   test('200: successfully updates the votes of an article and responds with the updated article', () => {
     const newVote = { inc_votes: 1 };

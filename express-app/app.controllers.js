@@ -13,7 +13,6 @@ const {
 exports.healthCheck = (req, res) => {
   res.status(200).send({ endpoints: endpointsJson });
 };
-
 exports.getTopics = (req, res, next) => {
   fetchTopics()
     .then((topic) => {
@@ -21,7 +20,6 @@ exports.getTopics = (req, res, next) => {
     })
     .catch(next);
 };
-
 exports.getArticleID = (req, res, next) => {
   const { article_id } = req.params;
   fetchArticleID(article_id)
@@ -30,7 +28,6 @@ exports.getArticleID = (req, res, next) => {
     })
     .catch(next);
 };
-
 exports.getArticles = (req, res, next) => {
   const { sort_by = 'created_at', order = 'DESC', topic = 'mitch' } = req.query;
   fetchArticles(sort_by, order, topic)
@@ -39,7 +36,6 @@ exports.getArticles = (req, res, next) => {
     })
     .catch(next);
 };
-
 exports.getComments = (req, res, next) => {
   const { article_id } = req.params;
   fetchComments(article_id)
@@ -48,7 +44,6 @@ exports.getComments = (req, res, next) => {
     })
     .catch(next);
 };
-
 exports.createComment = (req, res, next) => {
   const { article_id } = req.params;
   const { author, body } = req.body;

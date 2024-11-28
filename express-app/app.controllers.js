@@ -31,7 +31,11 @@ exports.getArticleID = (req, res, next) => {
     .catch(next);
 };
 exports.getArticles = (req, res, next) => {
-  const { sort_by = 'created_at', order = 'DESC', topic = 'mitch' } = req.query;
+  const {
+    sort_by = 'created_at',
+    order = 'DESC',
+    topic = 'coding',
+  } = req.query;
   fetchArticles(sort_by, order, topic)
     .then((articles) => {
       res.status(200).send({ articles });
@@ -87,9 +91,4 @@ exports.getSpecificUser = (req, res, next) => {
       res.status(200).send(user);
     })
     .catch(next);
-};
-exports.getAllArticles = (req, res, next) => {
-  fetchAllArticles().then((articles) => {
-    res.status(200).send({ articles });
-  });
 };

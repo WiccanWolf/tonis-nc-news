@@ -21,14 +21,13 @@ exports.fetchArticleID = (article_id) => {
 exports.fetchArticles = (sort_by, order, topic) => {
   const validSortColumns = ['author', 'title', 'created_at', 'votes'];
   const validOrder = ['ASC', 'DESC'];
-  const validTopics = ['mitch', 'cats', 'paper'];
+  const validTopics = ['coding', 'cooking', 'football'];
 
   let query = `
     SELECT articles.*, COUNT(comments.comment_id) AS comment_count
     FROM articles
     LEFT JOIN comments ON comments.article_id = articles.article_id
   `;
-
   if (topic) {
     if (!validTopics.includes(topic)) {
       return Promise.reject({
@@ -36,11 +35,9 @@ exports.fetchArticles = (sort_by, order, topic) => {
         msg: 'Bad Request: Invalid Topic Query',
       });
     }
-    query += `WHERE topic = '${topic}' `;
+    query += `WHERE topic = ${'topic'} `;
   }
-
   query += `GROUP BY articles.article_id `;
-
   if (sort_by) {
     if (!validSortColumns.includes(sort_by)) {
       return Promise.reject({
@@ -50,7 +47,6 @@ exports.fetchArticles = (sort_by, order, topic) => {
     }
     query += `ORDER BY ${sort_by} `;
   }
-
   if (order) {
     if (!validOrder.includes(order.toUpperCase())) {
       return Promise.reject({
@@ -63,9 +59,12 @@ exports.fetchArticles = (sort_by, order, topic) => {
     query += `ASC `;
   }
   return db.query(`${query};`).then(({ rows }) => {
+    console.log('🚀 ~ returndb.query ~ rows:', rows);
+    console.log('🚀 ~ returndb.query ~ query:', query);
     return rows;
   });
 };
+
 exports.fetchComments = (article_id) => {
   const query = `SELECT * FROM comments WHERE article_id = $1 ORDER BY created_at DESC`;
   if (!article_id) {
@@ -147,11 +146,5 @@ exports.fetchSpecificUser = (username) => {
       return Promise.reject({ status: 404, msg: 'Not Found' });
     }
     return userRows[0];
-  });
-};
-exports.fetchAllArticles = () => {
-  const query = `SELECT * FROM articles`;
-  return db.query(`${query};`).then(({ rows }) => {
-    return rows;
   });
 };

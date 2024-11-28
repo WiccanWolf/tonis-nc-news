@@ -5,7 +5,6 @@ exports.fetchTopics = () => {
     return rows;
   });
 };
-
 exports.fetchArticleID = (article_id) => {
   if (isNaN(Number(article_id))) {
     return Promise.reject({ status: 400, msg: 'Bad Request' });
@@ -19,7 +18,6 @@ exports.fetchArticleID = (article_id) => {
     return rows[0];
   });
 };
-
 exports.fetchArticles = (sort_by, order, topic) => {
   const validSortColumns = ['author', 'title', 'created_at', 'votes'];
   const validOrder = ['ASC', 'DESC'];
@@ -67,7 +65,6 @@ exports.fetchArticles = (sort_by, order, topic) => {
     return rows;
   });
 };
-
 exports.fetchComments = (article_id) => {
   const query = `SELECT * FROM comments WHERE article_id = $1 ORDER BY created_at DESC`;
   if (!article_id) {
@@ -80,7 +77,6 @@ exports.fetchComments = (article_id) => {
     return rows;
   });
 };
-
 exports.postNewComment = (article_id, username, body) => {
   if (!username) {
     return Promise.reject({ status: 400, msg: 'Bad Request' });
@@ -114,7 +110,6 @@ exports.postNewComment = (article_id, username, body) => {
       return commentRows[0];
     });
 };
-
 exports.updateArticleVotes = (articleId, incVotes) => {
   if (typeof incVotes !== 'number') {
     return Promise.reject({ status: 400, msg: 'Bad Request' });

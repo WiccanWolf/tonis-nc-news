@@ -1,6 +1,4 @@
-const app = require('./app');
-const port = 8000;
-const server = app.listen(port, () => {
-  console.log(`Server listening on ${port}...`);
-});
-module.exports = server;
+const app = require('./app.js');
+const { PORT = 9090 } = process.env;
+
+app.listen(PORT, () => console.log(`Listening on ${PORT}...`));

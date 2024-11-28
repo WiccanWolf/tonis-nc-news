@@ -371,3 +371,13 @@ describe('GET /api/users/:username', () => {
       });
   });
 });
+
+test('EDGE CASE: should return all articles when no query parameters are provided', () => {
+  return request(app)
+    .get('/api/articles')
+    .expect(200)
+    .then(({ body: { articles } }) => {
+      expect(Array.isArray(articles)).toBe(true);
+      expect(articles).not.toHaveLength(0);
+    });
+});

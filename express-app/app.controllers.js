@@ -9,6 +9,7 @@ const {
   removeCommentAtID,
   fetchUsers,
   fetchSpecificUser,
+  fetchAllArticles,
 } = require('./app.models');
 
 exports.healthCheck = (req, res) => {
@@ -86,4 +87,9 @@ exports.getSpecificUser = (req, res, next) => {
       res.status(200).send(user);
     })
     .catch(next);
+};
+exports.getAllArticles = (req, res, next) => {
+  fetchAllArticles().then((articles) => {
+    res.status(200).send({ articles });
+  });
 };

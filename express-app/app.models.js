@@ -66,7 +66,6 @@ exports.fetchArticles = (sort_by, order, topic) => {
     return rows;
   });
 };
-
 exports.fetchComments = (article_id) => {
   const query = `SELECT * FROM comments WHERE article_id = $1 ORDER BY created_at DESC`;
   if (!article_id) {
@@ -148,5 +147,11 @@ exports.fetchSpecificUser = (username) => {
       return Promise.reject({ status: 404, msg: 'Not Found' });
     }
     return userRows[0];
+  });
+};
+exports.fetchAllArticles = () => {
+  const query = `SELECT * FROM articles`;
+  return db.query(`${query};`).then(({ rows }) => {
+    return rows;
   });
 };

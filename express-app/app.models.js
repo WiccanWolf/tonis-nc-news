@@ -60,7 +60,9 @@ exports.fetchArticles = (sort_by, order, topic) => {
     }
     query += `${order.toUpperCase()} `;
   }
-
+  if (!sort_by && !order && !topic) {
+    query = `SELECT * FROM articles`;
+  }
   return db.query(`${query};`).then(({ rows }) => {
     return rows;
   });

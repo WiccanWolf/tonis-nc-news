@@ -52,9 +52,9 @@ exports.getComments = (req, res, next) => {
 exports.createComment = (req, res, next) => {
   const { article_id } = req.params;
   const { author, body } = req.body;
-  postNewComment({ article_id, author, body })
-    .then((comment) => {
-      res.status(201).send({ comment });
+  postNewComment(article_id, author, body)
+    .then((newComment) => {
+      res.status(201).send({ comment: newComment });
     })
     .catch(next);
 };

@@ -1,5 +1,4 @@
 const db = require('../db/connection');
-const format = require('pg-format');
 
 exports.fetchTopics = () => {
   return db.query(`SELECT * FROM topics;`).then(({ rows }) => {
@@ -82,30 +81,38 @@ exports.fetchComments = (article_id) => {
   });
 };
 
-exports.postNewComment = ({ article_id, author, body }) => {
-  if (!author || !body) {
+exports.postNewComment = (article_id, username, body) => {
+  if (!username) {
     return Promise.reject({ status: 400, msg: 'Bad Request' });
   }
-  if (body.length < 1) {
+  if (!body || body.trim().length === 0) {
     return Promise.reject({ status: 400, msg: 'Bad Request' });
   }
-  const query = format(
-    'INSERT INTO comments (article_id, author, body) VALUES (%L, %L, %L) RETURNING *;',
-    article_id,
-    author,
-    body
-  );
-  return db.query(query).then(({ rows }) => {
-    const newComment = rows[0];
-    return {
-      comment_id: newComment.comment_id,
-      article_id: newComment.article_id,
-      author: newComment.author,
-      body: newComment.body,
-      votes: newComment.votes || 0,
-      created_at: newComment.created_at.toString(),
-    };
-  });
+  const userCheckQuery = 'SELECT * FROM users WHERE username = $1;';
+  return db
+    .query(userCheckQuery, [username])
+    .then(({ rows: userRows }) => {
+      if (userRows.length === 0) {
+        const DEFAULT_NAME = 'Anonymous';
+        const newUserQuery = `
+          INSERT INTO users (username, name)
+          VALUES ($1, $2)
+          RETURNING *;
+        `;
+        return db.query(newUserQuery, [username, DEFAULT_NAME]);
+      }
+    })
+    .then(() => {
+      const insertCommentQuery = `
+        INSERT INTO comments (article_id, author, body)
+        VALUES ($1, $2, $3)
+        RETURNING *;
+      `;
+      return db.query(insertCommentQuery, [article_id, username, body]);
+    })
+    .then(({ rows: commentRows }) => {
+      return commentRows[0];
+    });
 };
 
 exports.updateArticleVotes = (articleId, incVotes) => {

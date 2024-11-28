@@ -8,6 +8,7 @@ const {
   updateArticleVotes,
   removeCommentAtID,
   fetchUsers,
+  fetchSpecificUser,
 } = require('./app.models');
 
 exports.healthCheck = (req, res) => {
@@ -75,6 +76,14 @@ exports.getUsers = (req, res, next) => {
   fetchUsers()
     .then((users) => {
       res.status(200).send({ users });
+    })
+    .catch(next);
+};
+exports.getSpecificUser = (req, res, next) => {
+  const { username } = req.params;
+  fetchSpecificUser(username)
+    .then((user) => {
+      res.status(200).send(user);
     })
     .catch(next);
 };

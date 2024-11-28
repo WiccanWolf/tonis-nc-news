@@ -5,7 +5,6 @@ const app = require('../express-app/app');
 const data = require('../db/data/test-data');
 const seed = require('../db/seeds/seed');
 const { toBeSortedBy } = require('jest-sorted');
-const { insertTestUser } = require('../express-app/app.models');
 
 /* Set up your test imports here */
 
@@ -346,6 +345,29 @@ describe('GET /api/users', () => {
           expect(user).toHaveProperty('name');
           expect(user).toHaveProperty('avatar_url');
         });
+      });
+  });
+});
+describe('GET /api/users/:username', () => {
+  test('200: should return a user object with properties: username, avatar_url, and name', () => {
+    const username = 'rogersop';
+    return request(app)
+      .get(`/api/users/${username}`)
+      .expect(200)
+      .then(({ body }) => {
+        expect(body).toHaveProperty('username', username);
+        expect(body).toHaveProperty('avatar_url');
+        expect(body).toHaveProperty('name');
+      });
+  });
+
+  test('404: should return 404 for non-existent user', () => {
+    const nonExistentUsername = 'unknownuser';
+    return request(app)
+      .get(`/api/users/${nonExistentUsername}`)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body).toHaveProperty('msg', 'Not Found');
       });
   });
 });

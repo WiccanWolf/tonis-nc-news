@@ -136,3 +136,15 @@ exports.fetchUsers = () => {
     return rows;
   });
 };
+exports.fetchSpecificUser = (username) => {
+  if (!username) {
+    return Promise.reject({ status: 400, msg: 'Bad Request' });
+  }
+  const userCheckQuery = 'SELECT * FROM users WHERE username = $1;';
+  return db.query(userCheckQuery, [username]).then(({ rows: userRows }) => {
+    if (userRows.length === 0) {
+      return Promise.reject({ status: 404, msg: 'Not Found' });
+    }
+    return userRows[0];
+  });
+};

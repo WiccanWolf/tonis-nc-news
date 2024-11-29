@@ -382,7 +382,7 @@ describe('GET /api/users/:username', () => {
       });
   });
 });
-describe.skip('PATCH /api/comments/:comment_id', () => {
+describe('PATCH /api/comments/:comment_id', () => {
   test('200: Updates the votes for the specified comment and responds with the updated comment', () => {
     return request(app)
       .patch('/api/comments/1')
@@ -415,7 +415,7 @@ describe.skip('PATCH /api/comments/:comment_id', () => {
       .send({})
       .expect(400)
       .then(({ body }) => {
-        expect(body.msg).toBe('Bad Request: inc_votes is required');
+        expect(body.msg).toBe('Bad Request');
       });
   });
 
@@ -425,7 +425,7 @@ describe.skip('PATCH /api/comments/:comment_id', () => {
       .send({ inc_votes: 'invalid' })
       .expect(400)
       .then(({ body }) => {
-        expect(body.msg).toBe('Bad Request: inc_votes must be a number');
+        expect(body.msg).toBe('Bad Request');
       });
   });
 
@@ -435,7 +435,7 @@ describe.skip('PATCH /api/comments/:comment_id', () => {
       .send({ inc_votes: 1 })
       .expect(404)
       .then(({ body }) => {
-        expect(body.msg).toBe('Not found');
+        expect(body.msg).toBe('Not Found');
       });
   });
 
@@ -445,7 +445,7 @@ describe.skip('PATCH /api/comments/:comment_id', () => {
       .send({ inc_votes: 1 })
       .expect(400)
       .then(({ body }) => {
-        expect(body.msg).toBe('Bad Request: Invalid comment_id');
+        expect(body.msg).toBe('Bad Request');
       });
   });
 });

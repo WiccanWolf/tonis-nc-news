@@ -134,7 +134,6 @@ exports.fetchUsers = () => {
   });
 };
 exports.fetchSpecificUser = (username) => {
-  console.log('🚀 ~ username:', username);
   const alphanumericRegex = /^[a-zA-Z0-9_]*$/;
   if (!username || !alphanumericRegex.test(username)) {
     return Promise.reject({
@@ -159,5 +158,38 @@ exports.fetchSpecificUser = (username) => {
         });
       }
       return rows[0];
+    });
+};
+exports.updateCommentVotes = (inc_votes, comment_id) => {
+  if (isNaN(inc_votes) || !inc_votes || isNaN(comment_id)) {
+    return Promise.reject({ status: 400, msg: 'Bad Request' });
+  }
+  if (!comment_id) {
+    return Promise.reject({ status: 404, msg: 'Not Found' });
+  }
+  return db
+    .query(
+      `
+    SELECT *
+    FROM comments
+    WHERE comment_id = $1;
+    `,
+      [comment_id]
+    )
+    .then(({ rows }) => {
+      if (rows.length === 0) {
+        return Promise.reject({
+          status: 404,
+          msg: 'Not Found',
+        });
+      }
+      return db
+        .query(
+          'UPDATE comments SET votes = votes + $1 WHERE comment_id = $2 RETURNING *',
+          [inc_votes, comment_id]
+        )
+        .then(({ rows }) => {
+          return rows[0];
+        });
     });
 };

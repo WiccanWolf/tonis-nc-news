@@ -59,12 +59,9 @@ exports.fetchArticles = (sort_by, order, topic) => {
     query += `ASC `;
   }
   return db.query(`${query};`).then(({ rows }) => {
-    console.log('🚀 ~ returndb.query ~ rows:', rows);
-    console.log('🚀 ~ returndb.query ~ query:', query);
     return rows;
   });
 };
-
 exports.fetchComments = (article_id) => {
   const query = `SELECT * FROM comments WHERE article_id = $1 ORDER BY created_at DESC`;
   if (!article_id) {
@@ -137,14 +134,30 @@ exports.fetchUsers = () => {
   });
 };
 exports.fetchSpecificUser = (username) => {
-  if (!username) {
-    return Promise.reject({ status: 400, msg: 'Bad Request' });
+  console.log('🚀 ~ username:', username);
+  const alphanumericRegex = /^[a-zA-Z0-9_]*$/;
+  if (!username || !alphanumericRegex.test(username)) {
+    return Promise.reject({
+      status: 400,
+      msg: 'Bad Request',
+    });
   }
-  const userCheckQuery = 'SELECT * FROM users WHERE username = $1;';
-  return db.query(userCheckQuery, [username]).then(({ rows: userRows }) => {
-    if (userRows.length === 0) {
-      return Promise.reject({ status: 404, msg: 'Not Found' });
-    }
-    return userRows[0];
-  });
+  return db
+    .query(
+      `
+      SELECT *
+      FROM users
+      WHERE username = $1;
+      `,
+      [username]
+    )
+    .then(({ rows }) => {
+      if (rows.length === 0) {
+        return Promise.reject({
+          status: 404,
+          msg: 'Not Found',
+        });
+      }
+      return rows[0];
+    });
 };

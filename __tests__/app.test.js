@@ -348,27 +348,104 @@ describe('GET /api/users', () => {
       });
   });
 });
-describe.skip('GET /api/users/:username', () => {
-  test('200: should return a user object with properties: username, avatar_url, and name', () => {
-    const username = 'rogersop';
+describe.only('GET /api/users/:username', () => {
+  test('200: Responds with a user object containing username, avatar_url, and name', () => {
     return request(app)
-      .get(`/api/users/${username}`)
+      .get('/api/users/butter_bridge')
       .expect(200)
       .then(({ body }) => {
-        console.log('🚀 ~ .then ~ body:', body);
-        expect(body).toHaveProperty('username', username);
-        expect(body).toHaveProperty('avatar_url');
-        expect(body).toHaveProperty('name');
+        expect(body.user).toEqual(
+          expect.objectContaining({
+            username: 'butter_bridge',
+            avatar_url: expect.any(String),
+            name: expect.any(String),
+          })
+        );
       });
   });
 
-  test('404: should return 404 for non-existent user', () => {
-    const nonExistentUsername = 'unknownuser';
+  test('404: Responds with an error if username does not exist', () => {
     return request(app)
-      .get(`/api/users/${nonExistentUsername}`)
+      .get('/api/users/nonexistent_user')
       .expect(404)
       .then(({ body }) => {
-        expect(body).toHaveProperty('msg', 'Not Found');
+        expect(body.msg).toBe('Not Found');
+      });
+  });
+
+  test('400: Responds with an error if username is invalid', () => {
+    return request(app)
+      .get('/api/users/user name')
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe('Bad Request');
+      });
+  });
+});
+describe('PATCH /api/comments/:comment_id', () => {
+  test('200: Updates the votes for the specified comment and responds with the updated comment', () => {
+    return request(app)
+      .patch('/api/comments/1')
+      .send({ inc_votes: 1 })
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.comment).toEqual(
+          expect.objectContaining({
+            comment_id: 1,
+            votes: expect.any(Number),
+          })
+        );
+        expect(body.comment.votes).toBe(17);
+      });
+  });
+
+  test('200: Decrements the votes for the specified comment and responds with the updated comment', () => {
+    return request(app)
+      .patch('/api/comments/2')
+      .send({ inc_votes: -1 })
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.comment.votes).toBe(13);
+      });
+  });
+
+  test('400: Responds with an error if inc_votes is missing from request body', () => {
+    return request(app)
+      .patch('/api/comments/1')
+      .send({})
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe('Bad Request: inc_votes is required');
+      });
+  });
+
+  test('400: Responds with an error if inc_votes is not a number', () => {
+    return request(app)
+      .patch('/api/comments/1')
+      .send({ inc_votes: 'invalid' })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe('Bad Request: inc_votes must be a number');
+      });
+  });
+
+  test('404: Responds with an error if comment_id does not exist', () => {
+    return request(app)
+      .patch('/api/comments/999')
+      .send({ inc_votes: 1 })
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe('Not found');
+      });
+  });
+
+  test('400: Responds with an error if comment_id is invalid', () => {
+    return request(app)
+      .patch('/api/comments/not-a-number')
+      .send({ inc_votes: 1 })
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe('Bad Request: Invalid comment_id');
       });
   });
 });

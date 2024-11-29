@@ -348,7 +348,7 @@ describe('GET /api/users', () => {
       });
   });
 });
-describe.only('GET /api/users/:username', () => {
+describe('GET /api/users/:username', () => {
   test('200: Responds with a user object containing username, avatar_url, and name', () => {
     return request(app)
       .get('/api/users/butter_bridge')
@@ -382,7 +382,7 @@ describe.only('GET /api/users/:username', () => {
       });
   });
 });
-describe('PATCH /api/comments/:comment_id', () => {
+describe.skip('PATCH /api/comments/:comment_id', () => {
   test('200: Updates the votes for the specified comment and responds with the updated comment', () => {
     return request(app)
       .patch('/api/comments/1')

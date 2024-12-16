@@ -193,3 +193,58 @@ exports.updateCommentVotes = (inc_votes, comment_id) => {
         });
     });
 };
+exports.createArticle = (newArticle) => {
+  const { author, title, body, topic, article_img_url } = newArticle;
+  const requiredFields = ['author', 'title', 'body', 'topic'];
+  const missingFields = requiredFields.filter((field) => !newArticle[field]);
+
+  if (missingFields.length > 0) {
+    return Promise.reject({
+      status: 400,
+      msg: `Bad Request`,
+    });
+  }
+  return db
+    .query('SELECT username FROM users WHERE username = $1;', [author])
+    .then(({ rowCount }) => {
+      if (rowCount === 0) {
+        return db
+          .query(
+            'INSERT INTO users (username, name) VALUES ($1, $2) RETURNING username;',
+            [author, 'Default Name']
+          )
+          .then(() => {
+            return insertArticle(author, title, body, topic, article_img_url);
+          });
+      } else {
+        return insertArticle(author, title, body, topic, article_img_url);
+      }
+    });
+};
+
+const insertArticle = (author, title, body, topic, article_img_url) => {
+  const insertQuery = `
+    INSERT INTO articles 
+    (author, title, body, topic, article_img_url) 
+    VALUES ($1, $2, $3, $4, $5)
+    RETURNING article_id, author, title, body, topic, article_img_url, votes, created_at;
+  `;
+
+  const defaultImgUrl = 'https://default-image-url.com/default.png';
+  const values = [author, title, body, topic, article_img_url || defaultImgUrl];
+
+  return db.query(insertQuery, values).then(({ rows }) => {
+    const article = rows[0];
+    return db
+      .query(
+        `SELECT COUNT(comment_id)::INT AS comment_count 
+           FROM comments 
+           WHERE article_id = $1;`,
+        [article.article_id]
+      )
+      .then(({ rows }) => {
+        article.comment_count = rows[0].comment_count || 0;
+        return article;
+      });
+  });
+};

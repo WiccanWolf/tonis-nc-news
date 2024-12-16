@@ -10,6 +10,8 @@ const {
   fetchUsers,
   fetchSpecificUser,
   updateCommentVotes,
+  articleCreation,
+  createArticle,
 } = require('./app.models');
 
 exports.healthCheck = (req, res) => {
@@ -98,6 +100,14 @@ exports.updateComment = (req, res, next) => {
   updateCommentVotes(inc_votes, comment_id)
     .then((updatedComment) => {
       res.status(200).send({ comment: updatedComment });
+    })
+    .catch(next);
+};
+exports.createNewArticle = (req, res, next) => {
+  const newArticle = req.body;
+  createArticle(newArticle)
+    .then((article) => {
+      res.status(201).send({ article });
     })
     .catch(next);
 };

@@ -12,6 +12,7 @@ const {
   updateCommentVotes,
   articleCreation,
   createArticle,
+  fetchTopicsBySlug,
 } = require('./app.models');
 
 exports.healthCheck = (req, res) => {
@@ -108,6 +109,14 @@ exports.createNewArticle = (req, res, next) => {
   createArticle(newArticle)
     .then((article) => {
       res.status(201).send({ article });
+    })
+    .catch(next);
+};
+exports.getSpecificTopic = (req, res, next) => {
+  const { slug } = req.params;
+  fetchTopicsBySlug(slug)
+    .then((topic) => {
+      res.status(200).send({ topic });
     })
     .catch(next);
 };

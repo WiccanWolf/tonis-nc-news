@@ -5,6 +5,13 @@ exports.fetchTopics = () => {
     return rows;
   });
 };
+exports.fetchTopicsBySlug = (slug) => {
+  return db
+    .query(`SELECT * FROM topics WHERE slug = $1;`, [slug])
+    .then(({ rows }) => {
+      return rows;
+    });
+};
 exports.fetchArticleID = (article_id) => {
   if (isNaN(Number(article_id))) {
     return Promise.reject({ status: 400, msg: 'Bad Request' });

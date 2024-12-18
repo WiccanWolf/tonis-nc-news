@@ -120,3 +120,4 @@ exports.getSpecificTopic = (req, res, next) => {
     })
     .catch(next);
 };
+exports.userLogin = (req, res, next) => {};
